@@ -1,61 +1,117 @@
-# PRESUPUESTO CCTV PRO
+# PRESUPUESTO CCTV
 
-Aplicación web 100% local (HTML + CSS + JS, sin dependencias) para auditar, calcular y
-entregar el presupuesto del proyecto:
+**Sistema Profesional de Presupuestación Técnica y Comercial**
 
-> **PROYECTO EJECUTIVO — CORRIENTES DÉBILES — TAVS / CCTV**
-> Supermercado 23 y 10 · Calle 23 e/ 10 y 12
-> Elaborado por: Ing. Cecilio A. Sáez N.
+Plataforma web para proyectos de CCTV, videovigilancia IP, telecomunicaciones,
+corrientes débiles y redes: gestión integral de equipos, materiales, software,
+mano de obra, transporte y propuestas comerciales con PDF técnico y comercial.
 
-## Cómo usar
+---
 
-1. Abrir `index.html` en cualquier navegador moderno (doble clic; no requiere servidor ni internet).
-2. Todo se guarda automáticamente en el navegador (localStorage).
-3. Botones superiores: **Guardar**, **Exportar CSV**, **Respaldo JSON**, **Importar JSON**,
-   **Imprimir / PDF Técnico**, **Imprimir / PDF Cliente** (elegir "Guardar como PDF" en el diálogo).
+## Acceso al sistema
 
-## Módulos
+- La aplicación abre con un **login profesional por contraseña** (sin usuario ni registro).
+- **Contraseña inicial:** la definida por el propietario del sistema (cámbiala tras el primer acceso).
+- La contraseña **nunca se guarda en texto plano**: se compara su hash **SHA-256**.
+- Sesión persistente de **12 horas**. Cierre de sesión desde el menú lateral ("Cerrar sesión").
+- Todas las secciones están protegidas: sin sesión activa solo es visible el login.
+- Para cambiar la contraseña: **Configuración Económica → Seguridad de acceso**.
 
-| Módulo | Contenido |
+## Instalación y ejecución
+
+No requiere servidor, dependencias ni compilación:
+
+```bash
+# Opción 1: abrir directamente
+doble clic en index.html
+
+# Opción 2: servir localmente
+python3 -m http.server 8080   # → http://localhost:8080
+```
+
+También funciona publicada como sitio estático (GitHub Pages, Netlify, etc.).
+
+### Variables de entorno
+
+En modo estático no son obligatorias. Para despliegues con servidor, use
+`.env.example` como plantilla (sin secretos reales):
+
+```bash
+cp .env.example .env   # defina APP_PASSWORD y AUTH_MODE=server
+```
+
+## Arquitectura
+
+| Capa | Tecnología |
 |---|---|
-| Dashboard | Configuración económica (impuesto, utilidad, transporte), parámetros técnicos (PoE, ancho de banda, almacenamiento), fórmula oficial en vivo y clasificación A–J |
-| Equipos | 22 partidas editables (21 cámaras 4MP, NVR 32ch, 2×6TB WD Purple facturadas, UPS, cableado, etc.) con grado de precio A/B/C/D, fuente, URL y disponibilidad |
-| Mano de Obra | 29 operaciones en 3 niveles (Técnico / Supervisor / Ingeniero) con tarifas editables |
-| Auditoría | 20 hallazgos (NVR sustituido, HDD facturado, MCB 6A con precio real, proveedor dudoso excluido, iVMS-4200 justificado, etc.) |
-| Validaciones | 16 verificaciones (10 automáticas) que habilitan el estado LISTO PARA CLIENTE |
-| Vista Cliente | Cotización sin URLs, sin costos internos y sin márgenes |
-
-## Reglas económicas (fórmula oficial)
+| Frontend | HTML5 + CSS3 + JavaScript vanilla (sin dependencias) |
+| Temas | Sistema de diseño con tokens CSS (`--*`) · Light / Dark persistente |
+| Auth | SHA-256 en JS puro (compatible con `file://`) + sesión en localStorage |
+| Persistencia | localStorage con autoguardado e indicador "✓ Cambios guardados" |
+| PDFs | Generación por impresión (motor CSS de impresión, portada propia) |
+| Responsive | Mobile First · breakpoints 640 / 768 / 1024 / 1440 / 1920 px |
 
 ```
-COSTO DIRECTO → UTILIDAD (CD × 30%) → SUBTOTAL → IMPUESTO (× 11%) → PRECIO FINAL
+index.html    → shell (login + sidebar + 15 secciones)
+styles.css    → sistema de diseño, temas, responsive, impresión
+js/data.js    → datos semilla (partidas, software, MO, transporte, auditoría)
+js/auth.js    → autenticación (SHA-256), sesión, tema claro/oscuro
+js/app.js     → motor económico, renders, validaciones, PDFs, exportaciones
 ```
 
-- Impuesto por defecto **11%** (editable: 0 / 5 / 11 / 15 / personalizado).
-- Utilidad por defecto **30% MARKUP SOBRE COSTO** (conmutable a margen sobre precio).
-- Transporte **desactivado por defecto**, 5 modos (fijo, %, por viaje, por km, manual).
-- Cobertura de precios: verde 100% · amarillo 90–99% · rojo <90%.
-- **Puerta de entrega**: sin 100% de cobertura A/B y 16 validaciones no se puede marcar LISTO PARA CLIENTE.
+## Secciones
+
+1. **Dashboard** — 9 KPIs, indicadores, ficha RESUMEN DE OFERTA, fórmula en vivo, clasificación A–J.
+2. **Datos del Proyecto** — información general + **Responsable (opcional)** + observaciones.
+3. **Equipos y Materiales** — partidas editables con grado A/B/C/D, fuente, URL, disponibilidad.
+4. **Software CCTV** — con valor económico o gratuito justificado (nombre, licencia, precio, fuente).
+5. **Mano de Obra** — 29 operaciones en 7 categorías (Ingeniería, Instalación, Redes, Configuración, Commissioning, Pruebas, Capacitación) con Cantidad × Precio Unitario.
+6. **Transporte** — opcional (interruptor): lista de gastos + 5 modos (fijo, %, viaje, km, manual).
+7. **Configuración Económica** — impuesto (11% por defecto), utilidad (30% por defecto), seguridad, respaldo.
+8. **Resumen para Cliente** — vista comercial sin costos internos.
+9. **Validación Técnica** — análisis PoE/banda/almacenamiento + 16 validaciones + máquina de estados.
+10. **Fuentes de Precios** — trazabilidad completa y cobertura A/B con filtros.
+11. **Análisis de Mercado** — distribución por grados, fuentes, alertas y costos por cámara.
+12. **Sustituciones** — equivalencias documentadas con estado de aprobación.
+13. **Auditoría Interna** — hallazgos y resoluciones.
+14. **PDF Técnico** — portada + 14 secciones internas (con fuentes y costos).
+15. **PDF Comercial** — documento para el cliente (sin URLs, costos ni márgenes).
+
+## Regla del responsable (dinámico)
+
+El responsable del presupuesto **no está predefinido** y **no viene con ningún
+nombre fijo**: se introduce libremente en *Datos del Proyecto → Responsable*
+(Elaborado por, Cargo, Empresa, Teléfono, Correo).
+
+- Todos los campos son **opcionales** y pueden borrarse en cualquier momento.
+- En los PDFs **solo aparecen los campos que tengan información**; los vacíos
+  se ocultan completamente (nunca se imprime "Elaborado por:" vacío).
+
+## Fórmula económica (por defecto)
+
+```
+Equipos + Materiales + Software + Mano de Obra + Transporte = COSTO DIRECTO
+COSTO DIRECTO + UTILIDAD (30% sobre costo)                  = SUBTOTAL DE VENTA
+SUBTOTAL DE VENTA + IMPUESTO (11%)                          = TOTAL DE OFERTA
+```
+
+Ambos porcentajes son editables (0 / 5 / 11 / 15 / personalizado).
+
+**Valores de referencia v2.0** (se recalculan en vivo): Equipos 4,015.67 ·
+Materiales 797.48 · Software 0.00 · Mano de obra 3,389.50 → **Costo directo
+8,202.65** · Utilidad (30%) 2,460.79 → **Subtotal de venta 10,663.44** ·
+Impuesto (11%) 1,172.98 → **Total de oferta ≈ USD 11,836.42**.
 
 ## Máquina de estados
 
 `BORRADOR → REVISIÓN TÉCNICA → REVISIÓN COMERCIAL → LISTO PARA CLIENTE`
 
-- A REVISIÓN TÉCNICA: PoE, puertos, ancho de banda y retención OK.
-- A REVISIÓN COMERCIAL: cobertura A/B ≥ 90%.
-- A LISTO PARA CLIENTE: las 16 validaciones aprobadas (incluye cobertura = 100%).
+- Revisión Técnica: PoE, puertos, ancho de banda y retención OK.
+- Revisión Comercial: cobertura A/B ≥ 90%.
+- Listo para Cliente: **16 validaciones aprobadas** (incluye cobertura = 100%).
 
-## Valores de referencia v1
+## Respaldo de datos
 
-Costo directo ≈ **USD 8,292.65** (equipos 4,813.15 + mano de obra 3,479.50) ·
-Utilidad 30% = 2,487.80 · Subtotal = 10,780.45 · Impuesto 11% = 1,185.85 ·
-**Precio final ≈ USD 11,966.29** (los valores se recalculan en vivo con cada edición).
-
-## Estructura
-
-```
-index.html    → interfaz
-styles.css    → tema azul corporativo minimal claro + impresión
-js/data.js    → datos semilla (partidas, MO, auditoría, validaciones)
-js/app.js     → lógica, cálculos, exportaciones, máquina de estados
-```
+- Autoguardado permanente en el navegador + indicador de última modificación.
+- **Respaldo JSON** (exportar/importar) y **Exportar CSV** desde Dashboard o Configuración.
+- Opción "Restablecer datos semilla" en Configuración Económica.

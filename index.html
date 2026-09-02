@@ -1,101 +1,231 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PRESUPUESTO CCTV PRO · Supermercado 23 y 10</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PRESUPUESTO CCTV · Sistema Profesional de Presupuestación Técnica y Comercial</title>
+<script>try{var t=localStorage.getItem('PCTV_THEME');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-<div class="app">
+<body class="locked">
 
+<!-- ============ LOGIN ============ -->
+<div id="loginScreen" class="login-screen hidden">
+  <div class="login-brand" aria-hidden="true">
+    <div class="lb-grid"></div>
+    <div class="lb-orb lb-o1"></div><div class="lb-orb lb-o2"></div>
+    <div class="lb-content">
+      <div class="lb-logo">CCTV</div>
+      <h1>PRESUPUESTO CCTV</h1>
+      <p class="lb-sub">Sistema Profesional de Presupuestación Técnica y Comercial</p>
+      <p class="lb-desc">Gestión integral de equipos, materiales, software, mano de obra y propuestas comerciales.</p>
+      <ul class="lb-feats">
+        <li>CCTV · Videovigilancia IP · Corrientes débiles</li>
+        <li>Precios reales trazables con fuentes A/B</li>
+        <li>Fórmula económica oficial en tiempo real</li>
+        <li>PDF técnico y PDF comercial profesionales</li>
+      </ul>
+    </div>
+  </div>
+  <div class="login-panel">
+    <form class="login-card" id="loginForm" autocomplete="off" novalidate>
+      <div class="lc-logo">CCTV</div>
+      <h2>PRESUPUESTO CCTV</h2>
+      <p class="lc-sub">Sistema Profesional de Presupuestación Técnica y Comercial</p>
+      <label for="loginPw">Contraseña</label>
+      <div class="pw-wrap">
+        <input type="password" id="loginPw" placeholder="Introduzca su contraseña" autocomplete="current-password">
+        <button type="button" id="pwToggle" class="pw-toggle" aria-label="Mostrar u ocultar contraseña">VER</button>
+      </div>
+      <div id="loginErr" class="login-err hidden" role="alert">Contraseña incorrecta. Inténtelo de nuevo.</div>
+      <button type="submit" id="loginBtn" class="btn-login">ENTRAR AL SISTEMA</button>
+      <div class="lc-foot">
+        <span>v2.0 · Acceso restringido</span>
+        <button type="button" class="theme-mini" id="themeToggleLogin">Modo claro / oscuro</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" class="app hidden">
   <header class="topbar">
+    <button class="hamburger" id="btnMenu" aria-label="Abrir menú" aria-expanded="false"><span></span><span></span><span></span></button>
     <div class="brand">
       <div class="logo">CCTV</div>
-      <div>
-        <h1>PRESUPUESTO CCTV PRO</h1>
-        <p class="sub">Proyecto Ejecutivo · Corrientes Débiles TAVS/CCTV · Supermercado 23 y 10, Calle 23 e/ 10 y 12</p>
-      </div>
+      <div class="brand-txt"><strong>PRESUPUESTO CCTV</strong><small>Sistema Profesional de Presupuestación</small></div>
     </div>
-    <div class="topactions">
+    <div class="top-right">
       <span class="stage" id="stageBadge">BORRADOR</span>
-      <button class="btn ghost" data-act="back" id="btnBack" title="Retroceder estado">&lsaquo; Retroceder</button>
-      <button class="btn" data-act="advance" id="btnAdvance">Avanzar estado &rsaquo;</button>
-      <button class="btn ghost" data-act="save">Guardar</button>
-      <button class="btn ghost" data-act="csv">Exportar CSV</button>
-      <button class="btn ghost" data-act="json">Respaldo JSON</button>
-      <button class="btn ghost" data-act="import">Importar JSON</button>
-      <button class="btn dark" data-act="print-tech">Imprimir / PDF Técnico</button>
-      <button class="btn dark" data-act="print-client">Imprimir / PDF Cliente</button>
+      <span class="save-ind" id="saveStatus">✓ Guardado</span>
+      <button class="icon-btn" id="themeToggle" title="Cambiar tema" aria-label="Cambiar tema">◐</button>
+      <button class="icon-btn" id="btnLogout" title="Cerrar sesión" aria-label="Cerrar sesión">Salir</button>
     </div>
   </header>
 
-  <section class="kpis">
-    <div class="kpi" id="kpiCovWrap">
-      <span class="kpi-l">COBERTURA DE PRECIOS A/B</span>
-      <span class="kpi-v" id="kpiCov">–</span>
-      <span class="kpi-s" id="kpiCovS"></span>
+  <aside id="sidebar" class="sidebar" aria-label="Navegación principal">
+    <nav id="nav">
+      <button class="nav-it active" data-sec="dash">Dashboard</button>
+      <button class="nav-it" data-sec="proyecto">Datos del Proyecto</button>
+      <button class="nav-it" data-sec="equipos">Equipos y Materiales</button>
+      <button class="nav-it" data-sec="software">Software CCTV</button>
+      <button class="nav-it" data-sec="mo">Mano de Obra</button>
+      <button class="nav-it" data-sec="transp">Transporte</button>
+      <button class="nav-it" data-sec="econ">Configuración Económica</button>
+      <button class="nav-it" data-sec="cliente">Resumen para Cliente</button>
+      <button class="nav-it" data-sec="valid">Validación Técnica</button>
+      <button class="nav-it" data-sec="fuentes">Fuentes de Precios</button>
+      <button class="nav-it" data-sec="mercado">Análisis de Mercado</button>
+      <button class="nav-it" data-sec="sust">Sustituciones</button>
+      <button class="nav-it" data-sec="audit">Auditoría Interna</button>
+      <button class="nav-it" data-sec="pdft">PDF Técnico</button>
+      <button class="nav-it" data-sec="pdfc">PDF Comercial</button>
+    </nav>
+    <div class="side-foot">
+      <span id="sideSave">✓ Cambios guardados</span>
+      <span>PRESUPUESTO CCTV v2.0</span>
+      <button class="side-logout" id="btnLogout2">Cerrar sesión</button>
     </div>
-    <div class="kpi"><span class="kpi-l">COSTO DIRECTO</span><span class="kpi-v" id="kpiCD">–</span></div>
-    <div class="kpi"><span class="kpi-l">UTILIDAD</span><span class="kpi-v" id="kpiU">–</span></div>
-    <div class="kpi"><span class="kpi-l">IMPUESTO</span><span class="kpi-v" id="kpiI">–</span></div>
-    <div class="kpi hl"><span class="kpi-l">PRECIO FINAL</span><span class="kpi-v" id="kpiPF">–</span></div>
-  </section>
-  <div class="covbar"><div id="covBar"></div><span id="covTxt"></span></div>
+  </aside>
+  <div id="overlay" class="overlay"></div>
 
-  <nav class="tabs">
-    <button class="tab active" data-act="tab" data-tab="dash">Dashboard</button>
-    <button class="tab" data-act="tab" data-tab="eq">Equipos (editable)</button>
-    <button class="tab" data-act="tab" data-tab="mo">Mano de Obra (29 ops)</button>
-    <button class="tab" data-act="tab" data-tab="aud">Auditoría (20)</button>
-    <button class="tab" data-act="tab" data-tab="val">Validaciones (16)</button>
-    <button class="tab" data-act="tab" data-tab="cli">Vista Cliente</button>
-  </nav>
-
-  <main>
-    <section id="sec-dash">
-      <div class="grid3" id="dashPanels"></div>
-      <div class="card" id="techPanel"></div>
-      <div class="card" id="formulaPanel"></div>
+  <main id="main">
+    <section id="sec-dash" class="sec">
+      <div class="toolbar">
+        <button class="btn" data-act="csv">Exportar CSV</button>
+        <button class="btn ghost" data-act="json">Respaldo JSON</button>
+        <button class="btn ghost" data-act="import">Importar JSON</button>
+        <button class="btn dark" data-act="print-tech">PDF Técnico</button>
+        <button class="btn dark" data-act="print-client">PDF Comercial</button>
+      </div>
+      <h2 class="sec-title">Dashboard</h2>
+      <div class="kpi-grid" id="kpiGrid"></div>
+      <div class="chips" id="indChips"></div>
+      <div class="grid2">
+        <div class="card oferta" id="ofertaCard"></div>
+        <div class="card" id="formulaPanel"></div>
+      </div>
       <div class="card"><h3>Clasificación económica A–J (USD)</h3><div id="summaryTable"></div></div>
     </section>
 
-    <section id="sec-eq" class="hidden">
+    <section id="sec-proyecto" class="sec hidden">
+      <h2 class="sec-title">Datos del Proyecto</h2>
+      <p class="muted">Sección principal de configuración. El responsable es <b>opcional</b>: los campos vacíos no aparecen en los PDFs.</p>
+      <div class="grid2" id="proyectoForm"></div>
+      <div class="card" id="obsCard"></div>
+    </section>
+
+    <section id="sec-equipos" class="sec hidden">
+      <h2 class="sec-title">Equipos y Materiales</h2>
       <div class="toolbar">
         <button class="btn" data-act="add-row">+ Agregar partida</button>
         <button class="btn ghost" data-act="reset">Restablecer datos semilla</button>
-        <span class="muted">Haga clic en cualquier celda para editar. Los cambios se guardan automáticamente en este navegador.</span>
+        <span class="muted">Haga clic en cualquier celda para editar.</span>
       </div>
       <div class="card tablewrap" id="eqTable"></div>
     </section>
 
-    <section id="sec-mo" class="hidden">
+    <section id="sec-software" class="sec hidden">
+      <h2 class="sec-title">Software CCTV</h2>
+      <p class="muted">El software puede tener valor económico o ser gratuito (con justificación). Cada ítem alimenta el costo directo.</p>
+      <div class="toolbar"><button class="btn" data-act="add-sw">+ Agregar software</button></div>
+      <div class="card tablewrap" id="swTable"></div>
+    </section>
+
+    <section id="sec-mo" class="sec hidden">
+      <h2 class="sec-title">Mano de Obra</h2>
       <div class="card" id="ratesPanel"></div>
+      <div class="toolbar">
+        <button class="btn" data-act="add-mo">+ Agregar operación</button>
+        <span class="muted">Organizada por categorías. Cantidad × Precio Unitario = Subtotal.</span>
+      </div>
       <div class="card tablewrap" id="moTable"></div>
     </section>
 
-    <section id="sec-aud" class="hidden">
+    <section id="sec-transp" class="sec hidden">
+      <h2 class="sec-title">Transporte</h2>
+      <div class="card" id="transPanel"></div>
+      <div class="card tablewrap" id="transTable"></div>
+    </section>
+
+    <section id="sec-econ" class="sec hidden">
+      <h2 class="sec-title">Configuración Económica</h2>
+      <div class="grid2" id="econPanel"></div>
+      <div class="card" id="pwPanel"></div>
+      <div class="card">
+        <h3>Datos y respaldo</h3>
+        <div class="toolbar">
+          <button class="btn" data-act="csv">Exportar CSV</button>
+          <button class="btn ghost" data-act="json">Respaldo JSON</button>
+          <button class="btn ghost" data-act="import">Importar JSON</button>
+          <button class="btn ghost" data-act="reset">Restablecer semilla</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="sec-cliente" class="sec hidden">
+      <h2 class="sec-title">Resumen para Cliente</h2>
+      <p class="muted">Vista comercial: sin URLs, sin costos internos y sin márgenes. El responsable aparece solo si usted lo introdujo.</p>
+      <div class="card"><div id="clientView"></div></div>
+    </section>
+
+    <section id="sec-valid" class="sec hidden">
+      <h2 class="sec-title">Validación Técnica</h2>
+      <div class="card" id="techPanel"></div>
+      <div class="card" id="statePipeline"></div>
+      <div class="card tablewrap" id="valTable"></div>
+    </section>
+
+    <section id="sec-fuentes" class="sec hidden">
+      <h2 class="sec-title">Fuentes de Precios</h2>
+      <div class="card" id="covHeader"></div>
+      <div class="card tablewrap" id="fuentesTable"></div>
+    </section>
+
+    <section id="sec-mercado" class="sec hidden">
+      <h2 class="sec-title">Análisis de Mercado</h2>
+      <div id="mercadoPanel"></div>
+    </section>
+
+    <section id="sec-sust" class="sec hidden">
+      <h2 class="sec-title">Sustituciones y Equivalencias</h2>
+      <div class="toolbar"><button class="btn" data-act="add-sust">+ Agregar sustitución</button></div>
+      <div class="card tablewrap" id="sustTable"></div>
+    </section>
+
+    <section id="sec-audit" class="sec hidden">
+      <h2 class="sec-title">Auditoría Interna</h2>
       <div class="card tablewrap" id="audTable"></div>
     </section>
 
-    <section id="sec-val" class="hidden">
-      <div class="card tablewrap" id="valTable"></div>
-      <p class="muted">La condición <b>LISTO PARA CLIENTE</b> exige las 16 validaciones aprobadas (automática o excepción justificada) y cobertura de precios A/B = 100%.</p>
+    <section id="sec-pdft" class="sec hidden">
+      <h2 class="sec-title">PDF Técnico</h2>
+      <p class="muted">Documento interno con fuentes, grados, análisis y costos. Portada con datos dinámicos del proyecto; responsable solo si está introducido.</p>
+      <div class="toolbar">
+        <button class="btn" data-act="preview-tech">Generar vista previa</button>
+        <button class="btn dark" data-act="print-tech">Imprimir / Guardar PDF</button>
+      </div>
+      <div class="card" id="pdfTechPreview"></div>
     </section>
 
-    <section id="sec-cli" class="hidden">
-      <div class="card"><div id="clientView"></div></div>
+    <section id="sec-pdfc" class="sec hidden">
+      <h2 class="sec-title">PDF Comercial</h2>
+      <p class="muted">Documento para el cliente: sin costos internos, sin márgenes y sin fuentes de proveedores.</p>
+      <div class="toolbar">
+        <button class="btn" data-act="preview-client">Generar vista previa</button>
+        <button class="btn dark" data-act="print-client">Imprimir / Guardar PDF</button>
+      </div>
+      <div class="card" id="pdfCliPreview"></div>
     </section>
   </main>
-
-  <footer class="foot">Aplicación 100% local · Los datos se guardan en su navegador (localStorage) · Fórmula oficial: COSTO DIRECTO &rarr; UTILIDAD &rarr; SUBTOTAL &rarr; IMPUESTO &rarr; PRECIO FINAL</footer>
 </div>
 
-<input type="file" id="importFile" accept="application/json" hidden>
 <div id="toast"></div>
 <div id="printDoc"></div>
+<input type="file" id="importFile" accept="application/json" hidden>
 
 <script src="js/data.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
