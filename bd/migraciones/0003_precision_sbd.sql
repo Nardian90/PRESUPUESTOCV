@@ -120,7 +120,10 @@ CREATE TABLE sbd_normas_descriptivas (
     norma_tiempo    REAL,                              -- NORMA_Tiempo
     norma_prod      REAL,                              -- NORMA_PROD
     cuadrilla_json  TEXT,                              -- FT_DESC_1..6/CANTIDAD_1..6/GRUPO_1..6
-    UNIQUE (version_id, grupo, codigo)
+    -- La tabla fuente NO tiene PK y contiene variantes con mismo (grupo, codigo)
+    -- y distinto tiempo de norma (verificado: 4 variantes de 120027): la unicidad
+    -- es por CONTENIDO para conservar todas las variantes
+    UNIQUE (version_id, grupo, codigo, descripcion, norma_tiempo, norma_prod)
 );
 
 -- ----------------------------------------------------------------------------
@@ -167,13 +170,13 @@ CREATE TABLE sbd_duracion_costo_rv (
 CREATE TABLE sbd_actividades_estimacion (
     id              INTEGER PRIMARY KEY,
     version_id      INTEGER NOT NULL REFERENCES versiones_catalogo(id) ON DELETE RESTRICT,
-    cod_g_actest    TEXT    NOT NULL,                  -- CodGActEst
-    descripcion     TEXT,                              -- ActEst
+    cod_g_actest    TEXT    NOT NULL,                  -- CodGActEst (código de GRUPO: 48 grupos)
+    descripcion     TEXT,                              -- ActEst (PK fuente = (CodGActEst, ActEst))
     um              TEXT,                              -- UMEst
     precio_est      REAL,                              -- PrecEst
     precio_est_mlc  REAL,                              -- PrecEstMLC
     t_pesimista     REAL, t_esperado REAL, t_optimista REAL,   -- Money 4 dec
-    UNIQUE (version_id, cod_g_actest)
+    UNIQUE (version_id, cod_g_actest, descripcion)
 );
 
 -- ----------------------------------------------------------------------------

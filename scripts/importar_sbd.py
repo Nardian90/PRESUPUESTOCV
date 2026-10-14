@@ -52,6 +52,14 @@ def importar_priorizadas(cur, f, ver_id, stats, adv):
     _presupuesto_recursos(cur, f, ver_id, stats, adv, recursos_por_tipo)
 
 
+def _contar(cur, stats, t):
+    """Cuenta insertadas/duplicadas según el rowcount real del INSERT OR IGNORE."""
+    if cur.rowcount and cur.rowcount > 0:
+        stats.inc(t, "insertadas")
+    else:
+        stats.inc(t, "duplicadas_omitidas")
+
+
 def _colecciones(cur, f, ver_id, stats, adv):
     t = "Colecciones"
     for r in f.filas(t, ["IdColec", "Colec", "Tipo", "Suministrador", "IdColecVieja"]):
@@ -188,7 +196,7 @@ def _normas_descriptivas(cur, f, ver_id, stats, adv):
                     (ver_id, _s(r.get("GrupoN")), cod, _s(r.get("DESCRIPC")),
                      _s(r.get("ESPECIFIC")), _s(r.get("UMEDIDA")), _f32(r.get("NORMA_Tiempo")),
                      _f32(r.get("NORMA_PROD")), json.dumps(cuadrilla, ensure_ascii=False)))
-        stats.inc(t, "insertadas")
+        _contar(cur, stats, t)
 
 
 def _tarifas(cur, f, ver_id, stats, adv):
@@ -271,7 +279,7 @@ def _actividades(cur, f, ver_id, stats, adv):
                     (ver_id, cod, _s(r.get("ActEst")), _s(r.get("UMEst")),
                      _f32(r.get("PrecEst")), _f32(r.get("PrecEstMLC")),
                      _r(r.get("TPesimista")), _r(r.get("TEsperado")), _r(r.get("TOptimista"))))
-        stats.inc(t, "insertadas")
+        _contar(cur, stats, t)
 
 
 def _macros(cur, f, ver_id, stats, adv):
@@ -301,20 +309,21 @@ def _padres(cur, f, ver_id, stats, adv):
         stats.inc(t, "insertadas")
 
     t = "Objetos de Obra"
-    ids_obra, codigos_obj = set(), set()
-    for r in f.filas(t, ["IdObra", "CodObj", "ObjObra", "Nivel"]):
-        idobra, codobj = _int(r.get("IdObra")), _s(r.get("CodObj"))
-        if codobj is None:
+    ids_obj = set()
+    for r in f.filas(t, ["IdObjObra", "IdObra", "CodObj", "ObjObra", "Nivel"]):
+        idobj = _int(r.get("IdObjObra"))
+        if idobj is None:
             stats.inc(t, "omitidas_invalidas")
             continue
-        ids_obra.add(idobra)
-        codigos_obj.add(codobj)
+        ids_obj.add(idobj)
         cur.execute("""INSERT OR IGNORE INTO sbd_objetos_obra (version_id, id_origen, id_obra,
             cod_obj, obj_obra, nivel) VALUES (?,?,?,?,?,?)""",
-                    (ver_id, codobj, idobra, codobj, _s(r.get("ObjObra")), _int(r.get("Nivel"))))
+                    (ver_id, idobj, _int(r.get("IdObra")), _s(r.get("CodObj")),
+                     _s(r.get("ObjObra")), _int(r.get("Nivel"))))
         stats.inc(t, "insertadas")
-    # la PK real es (IdObra, CodObj): id_origen = CodObj (único por obra); el JOIN con
-    # presupuestos se verifica con datos abajo (IdObjObra↔IdObra)
+    # clave verificada con datos: Presupuesto Composición RV.IdObjObra → Objetos de
+    # Obra.IdObjObra coincide 16816/16816 (la PK declarada (IdObra, CodObj) es compuesta,
+    # pero el JOIN real de los presupuestos usa la columna autonumérica IdObjObra)
 
     t = "Etapas"
     ids_etapa = set()
@@ -327,7 +336,7 @@ def _padres(cur, f, ver_id, stats, adv):
         cur.execute("""INSERT OR IGNORE INTO sbd_etapas (version_id, id_origen, cod_etapa, etapa)
             VALUES (?,?,?,?)""", (ver_id, ide, _s(r.get("CodEtapa")), _s(r.get("Etapa"))))
         stats.inc(t, "insertadas")
-    return {"ids_obra_objetos": ids_obra, "ids_etapa": ids_etapa}
+    return {"ids_obj_obra": ids_obj, "ids_etapa": ids_etapa}
 
 
 def _presupuesto_rv(cur, f, ver_id, stats, adv, padres, codigos_partida):
@@ -344,7 +353,7 @@ def _presupuesto_rv(cur, f, ver_id, stats, adv, padres, codigos_partida):
             continue
         idobj, ideta = _int(r.get("IdObjObra")), _int(r.get("IdEtapa"))
         crv = _s(r.get("CODIGO RV"))
-        if idobj in padres["ids_obra_objetos"]:
+        if idobj in padres["ids_obj_obra"]:
             match_obj += 1
         if ideta in padres["ids_etapa"]:
             match_eta += 1
