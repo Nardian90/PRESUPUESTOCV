@@ -4,3 +4,5 @@ activos/*.exe
 # Artefactos regenerables de la Fase III (scripts los reconstruyen):
 prueba/db/*.db
 prueba/db/*.json
+# Base importada MISIÓN III-B: regenerable con scripts/importar_precodi.py
+bd/*.db
