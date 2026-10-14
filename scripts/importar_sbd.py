@@ -426,3 +426,6 @@ def _presupuesto_recursos(cur, f, ver_id, stats, adv, recursos_por_tipo):
             insertadas += 1
         stats.fijar_extra(t, {"insertadas": insertadas, "huérfanas_idprv": huerf_prv,
                               "huérfanas_recurso": huerf_rec, "reclasificadas_por_datos": reclasificadas})
+        if huerf_rec:
+            adv.append(f"{t}: {huerf_rec} recursos con código ausente en los nomencladores "
+                       f"importados (filas preservadas con su código; ver docs/DICCIONARIO_PRECODI.md)")
